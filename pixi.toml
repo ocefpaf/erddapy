@@ -1,0 +1,57 @@
+[workspace]
+name = "erddapy"
+channels = [ "conda-forge" ]
+platforms = [
+    "linux-64",
+    { platform = "osx-64", macos="14.0" },
+    { platform = "osx-arm64", macos="14.0" },
+    "win-64",
+]
+
+[pypi-dependencies]
+erddapy = { path = ".", editable = true, extras = [ "dev", "extras" ] }
+
+[dependencies]
+python = "*"
+
+[environments]
+default = { solve-group = "default" }
+dev = { features = [ "dev" ], solve-group = "default" }
+test311 = [ "dev", "py311" ]  # implicit: test311 = ["dev", "py311", "default"]
+test312 = [ "dev", "py312" ]
+test313 = [ "dev", "py313" ]
+test314 = [ "dev", "py314" ]
+docs314 = [ "dev", "docs" ]
+
+[feature.dev.tasks]
+pre_commit = "prek run --all-files"
+download_test_data = "cd tests && python download_test_data.py && cd .."
+# Waiting on https://github.com/prefix-dev/pixi/issues/837 for a better solution.
+notebooks = "jupyter nbconvert --to notebook --execute notebooks/00-quick_intro.ipynb --output=00-quick_intro-output.ipynb && jupyter nbconvert --to notebook --execute notebooks/01a-griddap.ipynb --output=01a-griddap-output.ipynb && jupyter nbconvert --to notebook --execute notebooks/01b-tabledap.ipynb --output=01b-tabledap-output.ipynb && jupyter nbconvert --to notebook --execute notebooks/02-extras.ipynb --output=02-extras-output.ipynb && jupyter nbconvert --to notebook --execute notebooks/03-advanced_search.ipynb --output=03-advanced_search-output.ipynb"
+docs = { cmd = "mv notebooks/*output.ipynb docs/source/ && cd docs && make clean html linkcheck", depends-on = ["notebooks"] }
+# Use the --record-mode=rewrite if you need to re-record the cassetts.
+tests = { cmd = "python -m pytest -rxs tests/", depends-on = ["download_test_data"] }
+coverage = { cmd = "python -m pytest -rxs --cov=erddapy tests/", depends-on = ["download_test_data"] }
+
+[feature.docs.dependencies]
+python = "~=3.14"
+cartopy = ">=0.21"
+geopandas = "*"
+joblib = "*"
+nbclassic = "*"
+nbconvert = "*"
+nbsphinx = "*"
+regionmask = ">=0.9"
+sphinx = "*"
+
+[feature.py311.dependencies]
+python = "~=3.11"
+
+[feature.py312.dependencies]
+python = "~=3.12"
+
+[feature.py313.dependencies]
+python = "~=3.13"
+
+[feature.py314.dependencies]
+python = "~=3.14"
