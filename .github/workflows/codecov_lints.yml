@@ -23,7 +23,8 @@ jobs:
 
     - name: Install erddapy
       run: |
-        pip install -e ".[dev,extras,docs]"
+        pip install --group dev
+        pip install -e .
 
     - name: Run tests with coverage
       run: >
